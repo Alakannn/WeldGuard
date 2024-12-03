@@ -44,7 +44,7 @@ Navigate to `http://localhost:5000` in your web browser.
 ## 🔨 Coming Soon
 - Video streaming with webcam
 - Database
--
+- Full website interface
 -
 -
 
