@@ -6,7 +6,7 @@ import os
 from ultralytics import YOLO
 import math
 
-# Load the YOLO object detection model (using lightweight nano version)
+# Load the YOLO object detection model
 model = YOLO('./models/runs/detect/train7/weights/best.pt')
 
 # Set of allowed file extensions for upload
@@ -16,7 +16,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 
-# Dummy credentials (you can replace this with a real authentication system)
+# Dummy credentials
 USER_CREDENTIALS = {
     'username': 'admin',
     'password': 'admin'
@@ -39,9 +39,9 @@ def predict_on_image(image_stream):
 
 def gen_frames():
     """Generate video frames with YOLO predictions."""
-    cap = cv2.VideoCapture(0)  # Capture video from webcam
+    cap = cv2.VideoCapture(0)
 
-    classNames = ["Bad Welding", "Crack", "Excess Reinforcement", 
+    classNames = ["Bad Welding", "Crack", "Excess Reinforcement",
                   "Good Welding", "Porosity", "Spatters"]
 
     while True:
@@ -117,7 +117,7 @@ def upload_file():
             file.stream.seek(0)
             original_img_base64 = base64.b64encode(file.stream.read()).decode('utf-8')
             return render_template(
-                'result.html', 
+                'result.html',
                 original_img_data=original_img_base64,
                 detection_img_data=detection_img_base64
             )
