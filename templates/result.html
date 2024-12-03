@@ -8,20 +8,21 @@
 
 <body>
     <header>
+        <img src="/static/uploads/powertechic.jpg" alt="Company Logo" class="logo">
         <h1>Detection Results</h1>
     </header>
     <main>
-        <div class="results-container">
-            <div class="image-container">
+        <div class="image-container">
+            <div class="image-box">
                 <h2>Original Image</h2>
                 <img src="data:image/png;base64,{{ original_img_data }}" alt="Original Image">
             </div>
-            <div class="image-container">
+            <div class="image-box">
                 <h2>Processed Image</h2>
                 <img src="data:image/png;base64,{{ detection_img_data }}" alt="Detected Image">
             </div>
         </div>
-        <a href="/" class="button">Go Back</a>
+        <a href="/" class="back-button">Go Back</a>
     </main>
 </body>
 
