@@ -2,12 +2,6 @@
 
 We are Group E1G2 in the Capstone Project. WeldGuard is our solution to save time and reduce the need for manual eye inspection during welding.
 
-## Why WeldGuard?
-
-- 👀 Automates visual inspection of welding processes
-- ⏱️ Saves valuable time for workers
-- 🔍 Provides instant and accurate defect detection
-- 👷 Reduces eye strain and manual inspection efforts
 ## 📦 Installation
 
 ### Step 1: Get the Code
