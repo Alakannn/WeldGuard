@@ -4,3 +4,4 @@ numpy
 ultralytics
 roboflow
 python-dotenv
+matplotlib
