@@ -1,35 +1,35 @@
 # WeldGuard
 
+We are Group E1G2 in the Capstone Project. WeldGuard is our solution to save time and reduce the need for manual eye inspection during welding.
+
+## Why WeldGuard?
+
+- 👀 Automates visual inspection of welding processes
+- ⏱️ Saves valuable time for workers
+- 🔍 Provides instant and accurate defect detection
+- 👷 Reduces eye strain and manual inspection efforts
 ## 📦 Installation
 
-### 1. Clone the Repository
+### Step 1: Get the Code
 ```bash
-https://github.com/3bdul1ah/WeldGuard.git
+git clone https://github.com/3bdul1ah/WeldGuard.git
 cd WeldGuard
 ```
 
-### 2. Create a Virtual Environment
+### Step 2: Create a Virtual Environment
 ```bash
 python3 -m venv venv
 
-# On Windows
+# Turn on the virtual environment
+
+# For Windows
 venv\Scripts\activate
 
-# On macOS/Linux
+# For Mac/Linux
 source venv/bin/activate
 ```
 
-### 3. Install Dependencies
-📋 Requirements.txt
-```
-Flask
-opencv-python
-numpy
-ultralytics
-roboflow
-python-dotenv
-```
-so you can run only this command to install them all
+### Step 3: Install What You Need
 ```bash
 pip install -r requirements.txt
 ```
