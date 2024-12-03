@@ -6,7 +6,7 @@ import os
 from ultralytics import YOLO
 
 # Load the YOLO object detection model (using lightweight nano version)
-model = YOLO('best.pt')
+model = YOLO('./models/welding train/runs/detect/train7/weights/best.pt')
 
 # Set of allowed file extensions for upload
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
