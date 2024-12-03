@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Original and Detection Image</title>
+    <style>
+        .image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .image-container img {
+            max-width: 50%; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Original and Detection Images</h1>
+    <div class="image-container">
+        <div class="original-image">
+            <h2>Original Image</h2>
+            <img src="data:image/png;base64,{{ original_img_data }}" alt="Original Image">
+        </div>
+        <div class="grayscale-image">
+            <h2>Detection Image</h2>
+            <img src="data:image/png;base64,{{ detection_img_data }}" alt="Detection Image">
+        </div>
+    </div>
+</body>
+</html>
