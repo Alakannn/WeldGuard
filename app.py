@@ -6,7 +6,7 @@ import os
 from ultralytics import YOLO
 import math
 
-# Load the YOLO object detection model
+# Load the YOLO object detection model hihi
 model = YOLO('./models/runs/detect/train7/weights/best.pt')
 
 # Set of allowed file extensions for upload
