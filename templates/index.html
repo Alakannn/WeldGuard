@@ -1,48 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PowerTech IC - Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <title>Home - PowerTech IC</title>
+    <style>
+        body, html {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: #f4f7fc;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 240px;
+            background-color: #2c3e50;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        h1, h2 {
+            color: #ecf0f1;
+            margin: 0 0 30px 0;
+            font-size: 24px;
+            text-align: center;
+            font-weight: 300;
+        }
+        h2 {
+            color: #2c3e50;
+            text-align: left;
+        }
+        .nav-button {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 12px 15px;
+            background-color: rgba(236, 240, 241, 0.1);
+            color: #ecf0f1;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: left;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .nav-button:hover {
+            background-color: rgba(236, 240, 241, 0.2);
+            transform: translateX(5px);
+        }
+        #clock {
+            font-size: 16px;
+            font-weight: 300;
+            margin-top: auto;
+            text-align: center;
+            color: #bdc3c7;
+            padding-top: 20px;
+            border-top: 1px solid rgba(236, 240, 241, 0.1);
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .card-header {
+            background-color: #3498db;
+            color: #fff;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .card-body {
+            padding: 20px;
+        }
+        .img-fluid {
+            max-width: 100%;
+            height: auto;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input[type="file"] {
+            display: block;
+            width: 100%;
+        }
+    </style>
 </head>
-
 <body>
     <div class="container">
-        <header>
-            <h1>Welcome, {{ session['username'] }}!</h1>
-            <nav>
-                <a href="{{ url_for('logout') }}" class="logout-btn" aria-label="Logout">Logout</a>
-            </nav>
-        </header>
-
-        <main>
-            <section class="live-camera-feed">
-                <div class="card">
-                    <h2 class="card-header">Live Camera Feed</h2>
-                    <div class="card-body">
-                        <img src="{{ url_for('camera_feed') }}" alt="Live Camera Feed" class="img-fluid">
-                    </div>
+        <div class="sidebar">
+            <h1>PowerTech IC</h1>
+            <a href="{{ url_for('index') }}" class="nav-button">Home</a>
+            <a href="#" class="nav-button">Dashboard</a>
+            <a href="{{ url_for('logout') }}" class="nav-button">Logout</a>
+            <div id="clock"></div>
+        </div>
+        <div class="main-content">
+            <h2>Welcome, {{ session['username'] }}!</h2>
+            
+            <div class="card">
+                <div class="card-header">Live Camera Feed</div>
+                <div class="card-body">
+                    <img src="{{ url_for('camera_feed') }}" alt="Live Camera Feed" class="img-fluid">
                 </div>
-            </section>
-
-            <section class="image-upload">
-                <div class="card">
-                    <h2 class="card-header">Upload Image for Detection</h2>
-                    <div class="card-body">
-                        <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_file') }}">
-                            <div class="form-group">
-                                <label for="file">Select an image to upload:</label>
-                                <input type="file" id="file" name="file" accept=".png,.jpg,.jpeg,.gif" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Upload Image</button>
-                        </form>
-                    </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Upload Image for Detection</div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_file') }}">
+                        <div class="form-group">
+                            <label for="file">Select an image to upload:</label>
+                            <input type="file" id="file" name="file" accept=".png,.jpg,.jpeg,.gif" required>
+                        </div>
+                        <button type="submit" class="btn-primary">Upload Image</button>
+                    </form>
                 </div>
-            </section>
-        </main>
+            </div>
+        </div>
     </div>
-</body>
 
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const clockElement = document.getElementById('clock');
+            clockElement.textContent = now.toLocaleString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
 </html>
+
