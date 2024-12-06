@@ -4,78 +4,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detection Result</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f0f4f8;
-            font-family: 'Roboto', sans-serif;
-        }
-
-        .container {
-            margin-top: 30px;
-        }
-
-        .card {
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
-            background-color: #4CAF50;
-            color: white;
-            font-size: 18px;
-        }
-
-        .btn-secondary {
-            background-color: #FF6347;
-            border: none;
-            border-radius: 25px;
-            padding: 10px 20px;
-            font-size: 16px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-            background-color: #e55347;
-        }
-
-        .img-container img {
-            max-width: 100%;
-            max-height: 400px;
-            border-radius: 5px;
-        }
-    </style>
+    <title>Detection Result - PowerTech IC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
 </head>
 
 <body>
     <div class="container">
-        <h2 class="text-center">Detection Result</h2>
-        <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Home</a>
+        <header>
+            <h1>Detection Result</h1>
+            <nav>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Home</a>
+            </nav>
+        </header>
 
-        <div class="card my-4">
-            <div class="card-header">
-                Original Image
-            </div>
-            <div class="card-body">
-                <div class="img-container">
-                    <img src="data:image/png;base64,{{ original_img_data }}" alt="Original Image">
+        <main>
+            <section class="detection-results">
+                <div class="card original-image">
+                    <h2 class="card-header">Original Image</h2>
+                    <div class="card-body">
+                        <img src="data:image/png;base64,{{ original_img_data }}" alt="Original Image" class="img-fluid">
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="card">
-            <div class="card-header">
-                Detected Image
-            </div>
-            <div class="card-body">
-                <div class="img-container">
-                    <img src="data:image/png;base64,{{ detection_img_data }}" alt="Detected Image">
+                <div class="card detected-image">
+                    <h2 class="card-header">Detected Image</h2>
+                    <div class="card-body">
+                        <img src="data:image/png;base64,{{ detection_img_data }}" alt="Detected Image with Annotations"
+                            class="img-fluid">
+                    </div>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
     </div>
 </body>
 

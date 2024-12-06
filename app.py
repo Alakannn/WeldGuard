@@ -29,7 +29,7 @@ def allowed_file(filename):
 def predict_on_image(image_stream):
     """Process and predict image using YOLO model."""
     image = cv2.imdecode(
-        np.asarray(bytearray(image_stream.read()), dtype=np.uint8), 
+        np.asarray(bytearray(image_stream.read()), dtype=np.uint8),
         cv2.IMREAD_COLOR
     )
     results = model.predict(image)

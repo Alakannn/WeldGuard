@@ -4,109 +4,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Object Detection</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f4f7fc;
-            font-family: 'Roboto', sans-serif;
-        }
-
-        .container {
-            margin-top: 30px;
-        }
-
-        .card {
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
-            background-color: #4CAF50;
-            color: white;
-            font-size: 18px;
-        }
-
-        .card-body {
-            background-color: #fff;
-        }
-
-        .btn-primary {
-            background-color: #4CAF50;
-            border: none;
-            border-radius: 25px;
-            padding: 12px 30px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background-color: #45a049;
-        }
-
-        video {
-            max-width: 100%;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-
-        .logout-btn {
-            background-color: #FF6347;
-            color: white;
-            font-size: 16px;
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .logout-btn:hover {
-            background-color: #e55347;
-        }
-
-        .img-container img {
-            max-width: 100%;
-            max-height: 400px;
-            border-radius: 5px;
-        }
-    </style>
+    <title>PowerTech IC - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 
 <body>
     <div class="container">
-        <h2 class="text-center my-4">Welcome, {{ session['username'] }}!</h2>
-        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        <header>
+            <h1>Welcome, {{ session['username'] }}!</h1>
+            <nav>
+                <a href="{{ url_for('logout') }}" class="logout-btn" aria-label="Logout">Logout</a>
+            </nav>
+        </header>
 
-        <div class="card my-4">
-            <div class="card-header">
-                Live Camera Feed
-            </div>
-            <div class="card-body">
-                <img src="{{ url_for('camera_feed') }}" alt="Live Camera Feed" class="img-fluid">
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                Upload Image for Detection
-            </div>
-            <div class="card-body">
-                <form method="POST" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="file">Select an image to upload:</label>
-                        <input type="file" class="form-control" id="file" name="file" accept="image/*" required>
+        <main>
+            <section class="live-camera-feed">
+                <div class="card">
+                    <h2 class="card-header">Live Camera Feed</h2>
+                    <div class="card-body">
+                        <img src="{{ url_for('camera_feed') }}" alt="Live Camera Feed" class="img-fluid">
                     </div>
-                    <button type="submit" class="btn btn-primary">Upload Image</button>
-                </form>
-            </div>
-        </div>
+                </div>
+            </section>
+
+            <section class="image-upload">
+                <div class="card">
+                    <h2 class="card-header">Upload Image for Detection</h2>
+                    <div class="card-body">
+                        <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_file') }}">
+                            <div class="form-group">
+                                <label for="file">Select an image to upload:</label>
+                                <input type="file" id="file" name="file" accept=".png,.jpg,.jpeg,.gif" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Upload Image</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 </body>
 
