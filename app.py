@@ -49,7 +49,7 @@ def gen_frames():
         if not success:
             break
 
-        results = model(img, stream=True)
+        results = model(img, stream=True, conf=0.8)
         for r in results:
             boxes = r.boxes
 
