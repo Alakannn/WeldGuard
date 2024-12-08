@@ -1,38 +1,32 @@
 {% extends "base.html" %}
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
-{% endblock %}
-
 {% block content %}
 <div class="container">
-    <header>
-        <h1>Detection Result</h1>
-        <a href="{{ url_for('index') }}" class="btn-secondary">Back to Home</a>
-    </header>
+    <div class="result-header">
+        <a href="{{ url_for('upload') }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Upload
+        </a>
+        <h2>Detection Result</h2>
+    </div>
 
-    <main role="main">
-        <section class="detection-results">
-            <div class="image-container">
-                <div class="card original-image">
-                    <div class="card-header">
-                        <h2>Original Image</h2>
-                    </div>
-                    <div class="card-body">
-                        <img src="data:image/png;base64,{{ original_img_data }}" alt="Original Image" class="img-fluid">
-                    </div>
-                </div>
+    <div class="result-grid">
+        <div class="result-card">
+            <h3>Original Image</h3>
+            <img src="data:image/jpeg;base64,{{ original_img_data }}" alt="Original Image" class="result-image">
+        </div>
 
-                <div class="card detected-image">
-                    <div class="card-header">
-                        <h2>Detected Image</h2>
-                    </div>
-                    <div class="card-body">
-                        <img src="data:image/png;base64,{{ detection_img_data }}" alt="Detected Image with Annotations"
-                            class="img-fluid">
+        <div class="result-card">
+            <h3>Detection Result</h3>
+            <img src="data:image/jpeg;base64,{{ detection_img_data }}" alt="Detection Result" class="result-image">
+            {% if confidence %}
+            <div class="confidence-wrapper">
+                <div class="confidence-bar">
+                    <div class="confidence-fill" style="width: {{ confidence }}%">
+                        {{ "%.1f"|format(confidence) }}%
                     </div>
                 </div>
             </div>
-        </section>
-    </main>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}

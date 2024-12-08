@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h2>Detection Analysis</h2>
+    </div>
+
+    <div class="analysis-dashboard">
+        <!-- Summary Cards -->
+        <div class="summary-grid">
+            <div class="summary-card total-detections">
+                <i class="fas fa-camera"></i>
+                <div class="card-content">
+                    <h3>Total Detections</h3>
+                    <div class="stat-number">{{ total_detections }}</div>
+                </div>
+            </div>
+
+            <div class="summary-card avg-confidence">
+                <i class="fas fa-percentage"></i>
+                <div class="card-content">
+                    <h3>Average Confidence</h3>
+                    <div class="stat-number">
+                        {{ "%.1f"|format(confidence_data|map(attribute='confidence')|list|sum / confidence_data|length)
+                        }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Class Distribution -->
+        <div class="analysis-card full-width">
+            <div class="card-header">
+                <h3>Class Distribution</h3>
+            </div>
+            <div class="class-distribution">
+                {% for class_name, count in class_counts.items() %}
+                <div class="distribution-row">
+                    <div class="class-info">
+                        <span class="class-name">{{ class_name }}</span>
+                        <span class="class-count">{{ count }}</span>
+                    </div>
+                    <div class="distribution-bar-container">
+                        <div class="distribution-bar">
+                            <div class="distribution-fill" style="width: {{ (count / total_detections * 100)|round }}%">
+                            </div>
+                        </div>
+                        <span class="distribution-percentage">
+                            {{ "%.1f"|format(count / total_detections * 100) }}%
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Detections -->
+        <div class="analysis-card full-width">
+            <div class="card-header">
+                <h3>Recent Detections</h3>
+            </div>
+            <div class="recent-detections">
+                {% for data in confidence_data[:10] %}
+                <div class="detection-row">
+                    <div class="detection-time">{{ data.timestamp }}</div>
+                    <div class="confidence-bar-container">
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: {{ data.confidence }}%"></div>
+                        </div>
+                        <span class="confidence-value">{{ "%.1f"|format(data.confidence) }}%</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

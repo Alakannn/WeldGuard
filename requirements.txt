@@ -5,3 +5,5 @@ ultralytics
 roboflow
 python-dotenv
 matplotlib
+dash
+plotly

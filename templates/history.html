@@ -1,17 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="history-container">
-    <div class="theme-switch-wrapper">
-        <label class="theme-switch">
-            <input type="checkbox" id="darkModeToggle">
-            <span class="slider round"></span>
-        </label>
-        <span class="dark-mode-text">Dark Mode</span>
-    </div>
-
-    <div class="history-header">
+<div class="container">
+    <div class="page-header">
         <h2>Detection History</h2>
-        <p>Total Detections: {{ detections|length }}</p>
+        <span class="total-count">Total Detections: {{ detections|length }}</span>
     </div>
 
     {% if detections %}
@@ -20,100 +12,47 @@
         <div class="history-card">
             <div class="history-card-header">
                 <div class="timestamp">
-                    <i class="fas fa-clock"></i>
+                    <i class="fas fa-calendar"></i>
                     {{ detection.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
                 </div>
             </div>
 
-            <div class="image-grid">
-                <div class="image-item">
-                    <span class="image-label">Original</span>
-                    <img src="data:image/jpeg;base64,{{ detection.original_image }}" alt="Original Image"
-                        class="detection-image" onclick="openImageModal(this.src)">
-                </div>
-
-                <div class="image-item">
-                    <span class="image-label">Detection</span>
-                    <img src="data:image/jpeg;base64,{{ detection.detected_image }}" alt="Detection Result"
-                        class="detection-image" onclick="openImageModal(this.src)">
+            <div class="detection-images">
+                <div class="image-pair">
+                    <div class="image-container">
+                        <span class="image-label">Original</span>
+                        <img src="data:image/jpeg;base64,{{ detection.original_image }}" alt="Original Image">
+                    </div>
+                    <div class="image-container">
+                        <span class="image-label">Detection</span>
+                        <img src="data:image/jpeg;base64,{{ detection.detected_image }}" alt="Detection Result">
+                    </div>
                 </div>
             </div>
 
-            <div class="card-info">
-                {% if detection.detection_class %}
-                <div class="info-item">
+            <div class="detection-info">
+                <div class="info-row">
                     <span class="info-label">Class:</span>
-                    <span class="detection-badge">{{ detection.detection_class }}</span>
+                    <span class="detection-class">{{ detection.detection_class }}</span>
                 </div>
-                {% endif %}
-
-                {% if detection.confidence %}
-                <div class="info-item">
+                <div class="info-row">
                     <span class="info-label">Confidence:</span>
-                    <div class="confidence-bar">
-                        <div class="confidence-fill" style="width: {{ detection.confidence }}%"></div>
+                    <div class="confidence-bar-container">
+                        <div class="confidence-bar">
+                        </div>
                         <span class="confidence-value">{{ "%.1f"|format(detection.confidence) }}%</span>
                     </div>
                 </div>
-                {% endif %}
             </div>
         </div>
         {% endfor %}
     </div>
-
-    <!-- Image Modal -->
-    <div id="imageModal" class="modal">
-        <span class="modal-close">&times;</span>
-        <img id="modalImage" class="modal-content">
-    </div>
-
     {% else %}
     <div class="empty-state">
-        <i class="fas fa-camera"></i>
-        <p>No detections found</p>
-        <a href="{{ url_for('index') }}" class="btn-primary">Start Detection</a>
+        <i class="fas fa-history"></i>
+        <p>No detection history available</p>
+        <a href="{{ url_for('upload') }}" class="btn-primary">Start Detection</a>
     </div>
     {% endif %}
 </div>
-
-<script>
-    // Dark mode toggle
-    const darkModeToggle = document.getElementById('darkModeToggle');
-    const body = document.body;
-
-    // Check for saved dark mode preference
-    if (localStorage.getItem('darkMode') === 'enabled') {
-        body.classList.add('dark-mode');
-        darkModeToggle.checked = true;
-    }
-
-    darkModeToggle.addEventListener('change', function () {
-        if (this.checked) {
-            body.classList.add('dark-mode');
-            localStorage.setItem('darkMode', 'enabled');
-        } else {
-            body.classList.remove('dark-mode');
-            localStorage.setItem('darkMode', 'disabled');
-        }
-    });
-
-    // Modal functionality
-    function openImageModal(src) {
-        const modal = document.getElementById('imageModal');
-        const modalImg = document.getElementById('modalImage');
-        modal.style.display = "block";
-        modalImg.src = src;
-    }
-
-    document.querySelector('.modal-close').onclick = function () {
-        document.getElementById('imageModal').style.display = "none";
-    }
-
-    window.onclick = function (event) {
-        const modal = document.getElementById('imageModal');
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-</script>
 {% endblock %}

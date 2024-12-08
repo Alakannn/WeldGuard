@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, Response
+from flask import Flask, render_template, request, redirect, url_for, session, Response, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import base64
@@ -15,6 +15,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 db = SQLAlchemy(app)
 
+# Database Models
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -32,9 +33,12 @@ class Detection(db.Model):
 
 def init_model():
     try:
-        return load_model()
+        model = load_model()
+        if model is None:
+            raise ValueError("Model failed to load")
+        return model
     except Exception as e:
-        app.logger.error(f"Failed to load model: {str(e)}")
+        print(f"Error loading model: {e}")
         return None
 
 model = init_model()
@@ -43,85 +47,61 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
+            flash('Please login first')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
 
+# Routes
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html', class_names=CLASS_NAMES)
+    return redirect(url_for('camera_feed'))
 
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-
-        if User.query.filter_by(username=username).first():
-            return render_template('signup.html', error='Username already exists')
-
-        user = User(
-            username=username,
-            password_hash=generate_password_hash(password)
-        )
-        db.session.add(user)
-        db.session.commit()
-
-        return redirect(url_for('login'))
-    return render_template('signup.html')
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-
-        user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password_hash, password):
-            session['user_id'] = user.id
-            session['username'] = username
-            return redirect(url_for('index'))
-
-        return render_template('login.html', error='Invalid credentials')
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
-
-@app.route('/camera_feed')
+@app.route('/camera')
 @login_required
 def camera_feed():
-    try:
-        return Response(
-            generate_video_frames(model),
-            mimetype='multipart/x-mixed-replace; boundary=frame'
-        )
-    except Exception as e:
-        app.logger.error(f"Camera feed error: {str(e)}")
-        return "Camera feed error", 500
+    return render_template('camera_feed.html', class_names=CLASS_NAMES)
 
-@app.route('/upload', methods=['POST'])
+@app.route('/video_feed')
+@login_required
+def video_feed():
+    if model is None:
+        return "Model not loaded", 500
+    return Response(
+        generate_video_frames(model),
+        mimetype='multipart/x-mixed-replace; boundary=frame'
+    )
+
+@app.route('/upload_file', methods=['POST'])
 @login_required
 def upload_file():
     if 'file' not in request.files:
-        return {'error': 'No file uploaded'}, 400
+        flash('No file selected')
+        return redirect(url_for('upload'))
 
     file = request.files['file']
+    
     if file.filename == '':
-        return {'error': 'No selected file'}, 400
+        flash('No file selected')
+        return redirect(url_for('upload'))
 
     if not allowed_file(file.filename):
-        return {'error': 'Invalid file type'}, 400
+        flash('Invalid file type. Please use JPG, PNG or JPEG')
+        return redirect(url_for('upload'))
 
     try:
-        _, detection_img_base64, class_name, confidence = predict_on_image(model, file)
-
+        # Get original image first
+        file_data = file.read()
+        original_img_base64 = base64.b64encode(file_data).decode('utf-8')
+        
+        # Reset file pointer for detection
         file.seek(0)
-        original_img_base64 = base64.b64encode(file.read()).decode('utf-8')
-
+        
+        # Perform detection
+        _, detection_img_base64, class_name, confidence = predict_on_image(model, file)
+        
+        # Save to database
         detection = Detection(
             user_id=session['user_id'],
             original_image=original_img_base64,
@@ -132,17 +112,56 @@ def upload_file():
         db.session.add(detection)
         db.session.commit()
 
+        # Return result page
         return render_template(
             'result.html',
             original_img_data=original_img_base64,
             detection_img_data=detection_img_base64,
             class_name=class_name,
-            confidence=confidence,
-            class_names=CLASS_NAMES
+            confidence=confidence
         )
+        
     except Exception as e:
-        app.logger.error(f"File processing error: {str(e)}")
-        return {'error': 'Error processing file'}, 500
+        print(f"Error processing file: {str(e)}")
+        flash('Error processing file')
+        return redirect(url_for('upload'))
+
+@app.route('/upload', methods=['GET'])
+@login_required
+def upload():
+    return render_template('upload.html')
+
+@app.route('/analysis')
+@login_required
+def analysis():
+    user_detections = Detection.query.filter_by(user_id=session['user_id']).all()
+    
+    # Calculate statistics
+    total_detections = len(user_detections)
+    
+    # Count by class
+    class_counts = {}
+    for detection in user_detections:
+        class_name = detection.detection_class
+        if class_name in class_counts:
+            class_counts[class_name] += 1
+        else:
+            class_counts[class_name] = 1
+    
+    # Get confidence data
+    confidence_data = []
+    for detection in user_detections:
+        confidence_data.append({
+            'timestamp': detection.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+            'confidence': detection.confidence
+        })
+    
+    return render_template(
+        'analysis.html',
+        total_detections=total_detections,
+        class_counts=class_counts,
+        confidence_data=confidence_data
+    )
 
 @app.route('/history')
 @login_required
@@ -152,7 +171,55 @@ def history():
                               .all()
     return render_template('history.html', detections=detections)
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        user = User.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password_hash, password):
+            session['user_id'] = user.id
+            session['username'] = username
+            return redirect(url_for('index'))
+        
+        flash('Invalid username or password')
+    return render_template('login.html')
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        if User.query.filter_by(username=username).first():
+            flash('Username already exists')
+            return redirect(url_for('signup'))
+        
+        user = User(
+            username=username,
+            password_hash=generate_password_hash(password)
+        )
+        db.session.add(user)
+        db.session.commit()
+        
+        flash('Registration successful! Please login.')
+        return redirect(url_for('login'))
+        
+    return render_template('signup.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('You have been logged out')
+    return redirect(url_for('login'))
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        print("Database initialized")
+        if model is None:
+            print("WARNING: Model failed to load!")
+        else:
+            print("Model loaded successfully")
     app.run(debug=True, host='0.0.0.0', port=5000)
