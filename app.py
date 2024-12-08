@@ -19,6 +19,18 @@ def index():
         return redirect(url_for('login'))
     return render_template('index.html')
 
+@app.route('/home')
+def home():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('home.html')  # Redirect to home.html
+
+@app.route('/manual_test')
+def manual_test():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('manually_test.html')  # Render manually_test.html
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -26,7 +38,7 @@ def login():
         password = request.form['password']
         if username == USER_CREDENTIALS['username'] and password == USER_CREDENTIALS['password']:
             session['username'] = username
-            return redirect(url_for('index'))
+            return redirect(url_for('home'))  # Redirect to home after login
         else:
             return render_template('login.html', error="Invalid credentials")
     return render_template('login.html')

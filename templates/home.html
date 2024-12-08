@@ -10,9 +10,7 @@
             padding: 0;
             font-family: Arial, sans-serif;
             height: 100%;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            overflow: hidden; /* Prevent scrolling */
         }
         .container {
             display: flex;
@@ -26,7 +24,6 @@
             transition: all 0.3s;
             display: flex;
             flex-direction: column;
-            position: relative;
         }
         .sidebar.minimized {
             width: 60px;
@@ -59,15 +56,17 @@
             padding: 15px 20px;
             color: #fff;
             text-decoration: none;
-            transition: background-color 0.3s, transform 0.2s;
+            transition: background-color 0.3s;
         }
         .nav-button:hover {
             background-color: #2c3e50;
-            transform: scale(1.02);
         }
         .nav-button i {
             margin-right: 10px;
             font-size: 20px;
+        }
+        .nav-button span {
+            display: inline-block;
         }
         .sidebar.minimized .nav-button span {
             display: none;
@@ -96,42 +95,14 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            font-size: 24px;
-            color: #34495e;
-        }
-        .search-bar {
-            display: flex;
-            align-items: center;
-            margin-left: auto;
-        }
-        .search-bar input {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .notification {
-            background-color: #e7f3fe;
-            color: #31708f;
-            padding: 10px;
-            border: 1px solid #bce8f1;
-            border-radius: 4px;
-            margin-bottom: 20px;
+            justify-content: center; /* Center content vertically */
         }
         .card {
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin: 10px 0;
-            flex-grow: 1;
+            flex-grow: 1; /* Ensure cards grow to fit screen */
         }
         .card-header {
             background-color: #3498db;
@@ -156,6 +127,13 @@
         .btn:hover {
             background-color: #2980b9;
         }
+        .feedback-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
@@ -164,12 +142,11 @@
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h2>PowerTech IC</h2>
-                <img src="{{ url_for('static', filename='images/powertechic.jpg') }}" alt="PowerTech IC Logo" class="logo">
-            </div>
+                <img src="{{ url_for('static', filename='images/powertechic.jpg') }}" alt="PowerTech IC Logo" class="logo">            </div>
             <div class="sidebar-content">
-                <a href="{{ url_for('home') }}" class="nav-button">
+                <a href="{{ url_for('index') }}" class="nav-button">
                     <i class="fas fa-tachometer-alt"></i>
-                    <span>Home</span>
+                    <span>Dashboard</span>
                 </a>
                 <a href="{{ url_for('manual_test') }}" class="nav-button">
                     <i class="fas fa-vial"></i>
@@ -186,20 +163,33 @@
             </button>
         </div>
         <div class="main-content">
-            <div class="header">
-                <h1>Dashboard</h1>
-                <div class="search-bar">
-                    <input type="text" placeholder="Search..." aria-label="Search">
+            <div class="card">
+                <div class="card-header">Overview</div>
+                <div class="card-body">
+                    <p>Access various functions and features:</p>
+                    <ul>
+                        <li><strong>Real-time Monitoring:</strong> Keep track of your processes with live updates.</li>
+                        <li><strong>Data Visualization:</strong> Access charts and graphs to analyze performance and trends.</li>
+                        <li><strong>Image Processing:</strong> View images captured by the camera and their processed versions.</li>
+                    </ul>
                 </div>
             </div>
-            <main>            
-                <div class="card">
-                    <div class="card-header">Live Camera Feed</div>
-                    <div class="card-body">
-                        <img src="{{ url_for('camera_feed') }}" alt="Live Camera Feed" style="max-width: 100%;">
-                    </div>
+            <div class="card">
+                <div class="card-header">Contact Information</div>
+                <div class="card-body">
+                    <p>For assistance, contact support at <a href="mailto:support@example.com">support@example.com</a> or call us at (60) 12-3456789.</p>
                 </div>
-            </main>
+            </div>
+            <div class="card">
+                <div class="card-header">Feedback</div>
+                <div class="card-body">
+                    <p>We value your feedback!</p>
+                    <form class="feedback-form" id="feedbackForm">
+                        <textarea id="feedbackText" rows="4" placeholder="Enter your feedback here"></textarea>
+                        <button type="submit" class="btn">Submit Feedback</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -213,6 +203,17 @@
 
         document.getElementById('toggleSidebar').addEventListener('click', function() {
             document.getElementById('sidebar').classList.toggle('minimized');
+        });
+
+        document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const feedbackText = document.getElementById('feedbackText').value;
+            if (feedbackText.trim() !== '') {
+                alert('Thank you for your feedback!');
+                this.reset();
+            } else {
+                alert('Please enter your feedback before submitting.');
+            }
         });
     </script>
 </body>
