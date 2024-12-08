@@ -6,6 +6,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detection Result - PowerTech IC</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fc;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        nav {
+            margin: 10px 0;
+        }
+
+        .btn {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-secondary {
+            background-color: #2c3e50;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        main {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .detection-results {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            flex: 1; /* Allow cards to grow equally */
+            max-width: 48%; /* Prevent cards from being too wide */
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .card-body {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .img-fluid {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
 </head>
 
 <body>
@@ -13,7 +99,7 @@
         <header>
             <h1>Detection Result</h1>
             <nav>
-                <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Home</a>
+                <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home</a>
             </nav>
         </header>
 
@@ -29,8 +115,7 @@
                 <div class="card detected-image">
                     <h2 class="card-header">Detected Image</h2>
                     <div class="card-body">
-                        <img src="data:image/png;base64,{{ detection_img_data }}" alt="Detected Image with Annotations"
-                            class="img-fluid">
+                        <img src="data:image/png;base64,{{ detection_img_data }}" alt="Detected Image with Annotations" class="img-fluid">
                     </div>
                 </div>
             </section>
