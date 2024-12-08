@@ -1,45 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - PowerTech IC</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
-</head>
-
-<body class="login-body">
-    <div class="login-wrapper">
-        <div class="login-container">
-            <div class="logo">
-                <img src="{{ url_for('static', filename='images/powertechic.jpg') }}" alt="PowerTech IC Logo">
-            </div>
-
-            <h1>Login</h1>
-
-            <form method="post" action="{{ url_for('login') }}">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required aria-required="true"
-                        placeholder="Enter your username">
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required aria-required="true"
-                        placeholder="Enter your password">
-                </div>
-
-                {% if error %}
-                <div class="alert alert-danger" role="alert">
-                    {{ error }}
-                </div>
-                {% endif %}
-
-                <button type="submit" class="btn btn-primary">Login</button>
-            </form>
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/powertechic.jpg') }}" alt="PowerTech IC Logo"
+                class="auth-logo">
         </div>
+        <h2>Login</h2>
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            {% if error %}
+            <div class="error-message">{{ error }}</div>
+            {% endif %}
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        <p class="auth-link">
+            Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a>
+        </p>
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}

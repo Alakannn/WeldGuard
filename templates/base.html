@@ -1,0 +1,35 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerTech IC - Welding Detection System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    {% if session.get('username') %}
+    <nav class="navbar">
+        <div class="container">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='images/powertechic.jpg') }}" alt="PowerTech IC Logo"
+                    class="nav-logo">
+                <h1>Welding Detection System</h1>
+            </div>
+            <div class="user-menu">
+                <span>Welcome, {{ session.username }}!</span>
+                <a href="{{ url_for('history') }}" class="nav-link">History</a>
+                <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+
+</html>

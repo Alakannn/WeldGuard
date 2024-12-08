@@ -1,41 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
+{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detection Result - PowerTech IC</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
-</head>
+{% block content %}
+<div class="container">
+    <header>
+        <h1>Detection Result</h1>
+        <a href="{{ url_for('index') }}" class="btn-secondary">Back to Home</a>
+    </header>
 
-<body>
-    <div class="container">
-        <header>
-            <h1>Detection Result</h1>
-            <nav>
-                <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Home</a>
-            </nav>
-        </header>
-
-        <main>
-            <section class="detection-results">
+    <main role="main">
+        <section class="detection-results">
+            <div class="image-container">
                 <div class="card original-image">
-                    <h2 class="card-header">Original Image</h2>
+                    <div class="card-header">
+                        <h2>Original Image</h2>
+                    </div>
                     <div class="card-body">
                         <img src="data:image/png;base64,{{ original_img_data }}" alt="Original Image" class="img-fluid">
                     </div>
                 </div>
 
                 <div class="card detected-image">
-                    <h2 class="card-header">Detected Image</h2>
+                    <div class="card-header">
+                        <h2>Detected Image</h2>
+                    </div>
                     <div class="card-body">
                         <img src="data:image/png;base64,{{ detection_img_data }}" alt="Detected Image with Annotations"
                             class="img-fluid">
                     </div>
                 </div>
-            </section>
-        </main>
-    </div>
-</body>
-
-</html>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}
