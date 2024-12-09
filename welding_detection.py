@@ -26,7 +26,7 @@ def predict_on_image(model, image_stream):
     nparr = np.frombuffer(image_bytes, np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-    results = model.predict(image, conf=0.5)[0]
+    results = model.predict(image, conf=0.48)[0]
 
     class_name = "Unknown"
     confidence = 0.0
@@ -47,7 +47,7 @@ def predict_on_image(model, image_stream):
     return annotated_img, img_base64, class_name, confidence * 100
 
 def generate_video_frames(model):
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(2)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 

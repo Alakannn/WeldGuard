@@ -406,26 +406,135 @@ body {
     width: 100%;
 }
 
-/* History Page Styles */
-.history-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: 20px;
-    padding: 20px 0;
+/* Scoped CSS for Detection History */
+#detection-history {
+    max-width: 900px;
+    margin: 20px auto;
+    font-family: Arial, sans-serif;
+    color: #333;
 }
 
-.history-card {
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
+#detection-history .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+#detection-history .total-count {
+    font-size: 16px;
+    color: #666;
+}
+
+#detection-history .history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+#detection-history .history-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #f9f9f9;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.history-card-header {
-    padding: 15px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #eee;
+#detection-history .history-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 }
+
+#detection-history .timestamp {
+    font-size: 14px;
+    color: #888;
+}
+
+#detection-history .detection-images {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+#detection-history .image-container {
+    flex: 1;
+    text-align: center;
+}
+
+#detection-history .image-label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+#detection-history .detection-info .info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+#detection-history .info-label {
+    font-weight: bold;
+}
+
+#detection-history .confidence-bar-container {
+    position: relative;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    height: 20px;
+    width: 100%;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+#detection-history .confidence-bar {
+    background-color: #4caf50;
+    /* Green color for confidence */
+    height: 100%;
+    border-radius: 5px 0 0 5px;
+    transition: width 0.3s ease-in-out;
+}
+
+#detection-history .confidence-value {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: #333;
+}
+
+#detection-history .empty-state {
+    text-align: center;
+    margin: 50px 0;
+    color: #777;
+}
+
+#detection-history .empty-state i {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+#detection-history .btn-primary {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+}
+
 
 .image-pair {
     display: grid;

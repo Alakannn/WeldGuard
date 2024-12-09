@@ -134,33 +134,46 @@ def upload():
 @app.route('/analysis')
 @login_required
 def analysis():
-    user_detections = Detection.query.filter_by(user_id=session['user_id']).all()
+    user_detections = Detection.query.filter_by(user_id=session['user_id']).order_by(Detection.timestamp.desc()).all()
     
-    # Calculate statistics
     total_detections = len(user_detections)
-    
-    # Count by class
     class_counts = {}
-    for detection in user_detections:
-        class_name = detection.detection_class
-        if class_name in class_counts:
-            class_counts[class_name] += 1
-        else:
-            class_counts[class_name] = 1
-    
-    # Get confidence data
     confidence_data = []
-    for detection in user_detections:
-        confidence_data.append({
-            'timestamp': detection.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-            'confidence': detection.confidence
-        })
+    daily_counts = {}
+    
+    if total_detections > 0:
+        # Class distribution
+        for detection in user_detections:
+            class_name = detection.detection_class or 'Unknown'
+            class_counts[class_name] = class_counts.get(class_name, 0) + 1
+            
+        # Confidence data for trend
+        confidence_data = [
+            {
+                'timestamp': detection.timestamp.strftime('%Y-%m-%d'),
+                'confidence': float(detection.confidence) if detection.confidence else 0.0
+            }
+            for detection in user_detections
+        ]
+        
+        # Daily detection counts
+        for detection in user_detections:
+            date = detection.timestamp.strftime('%Y-%m-%d')
+            daily_counts[date] = daily_counts.get(date, 0) + 1
+    
+        # Calculate average confidence
+        confidences = [d.confidence for d in user_detections if d.confidence]
+        avg_confidence = sum(confidences) / len(confidences) if confidences else 0
+    else:
+        avg_confidence = 0
     
     return render_template(
         'analysis.html',
         total_detections=total_detections,
         class_counts=class_counts,
-        confidence_data=confidence_data
+        confidence_data=confidence_data,
+        daily_counts=daily_counts,
+        avg_confidence=avg_confidence
     )
 
 @app.route('/history')

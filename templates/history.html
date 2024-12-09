@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container">
+<div id="detection-history" class="container">
     <div class="page-header">
         <h2>Detection History</h2>
         <span class="total-count">Total Detections: {{ detections|length }}</span>
@@ -38,8 +38,7 @@
                 <div class="info-row">
                     <span class="info-label">Confidence:</span>
                     <div class="confidence-bar-container">
-                        <div class="confidence-bar">
-                        </div>
+                        <div class="confidence-bar" style="width: {{ detection.confidence }}%;"></div>
                         <span class="confidence-value">{{ "%.1f"|format(detection.confidence) }}%</span>
                     </div>
                 </div>
