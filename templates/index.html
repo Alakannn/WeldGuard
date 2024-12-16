@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="main-container">
+    <div class="detection-tabs">
+        <button class="tab-btn active" onclick="switchTab('live')">Live Detection</button>
+        <button class="tab-btn" onclick="switchTab('upload')">Upload Image</button>
+    </div>
+
+    <div id="live" class="tab-content active">
+        <div class="detection-card">
+            <div class="card-header">
+                <h2>Live Welding Detection</h2>
+                <div class="class-badge">Real-time Analysis</div>
+            </div>
+            <div class="video-container">
+                <img src="{{ url_for('camera_feed') }}" alt="Live Detection Feed">
+            </div>
+            <div class="detection-classes">
+                <h3>Detection Classes:</h3>
+                <div class="class-grid">
+                    {% for class_name in class_names %}
+                    <div class="class-item">{{ class_name }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="upload" class="tab-content">
+        <div class="detection-card">
+            <div class="card-header">
+                <h2>Upload Image for Detection</h2>
+                <div class="class-badge">Image Analysis</div>
+            </div>
+            <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" class="upload-form"
+                id="uploadForm">
+                <div class="upload-zone">
+                    <div class="upload-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag and drop an image or click to browse</p>
+                        <span class="file-types">Supported: JPG, PNG, JPEG</span>
+                    </div>
+                    <input type="file" name="file" id="file" accept="image/*" required>
+                </div>
+                <button type="submit" class="submit-btn">
+                    Upload and Detect
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
