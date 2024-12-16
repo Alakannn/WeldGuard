@@ -1,9 +1,0 @@
-Flask
-opencv-python
-numpy
-ultralytics
-roboflow
-python-dotenv
-matplotlib
-dash
-plotly
