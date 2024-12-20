@@ -304,6 +304,43 @@
                 }
             });
 
+            // Function to capture image every 10 seconds
+            function captureImage() {
+                const imgElement = document.querySelector('.video-container img'); // Get the live feed image element
+                
+                // Create a canvas to capture the image
+                const canvas = document.createElement('canvas');
+                canvas.width = imgElement.naturalWidth; // Set canvas width to the natural width of the image
+                canvas.height = imgElement.naturalHeight; // Set canvas height to the natural height of the image
+
+                const context = canvas.getContext('2d');
+                context.drawImage(imgElement, 0, 0, canvas.width, canvas.height); // Draw the image onto the canvas
+
+                canvas.toBlob(function(blob) {
+                    const formData = new FormData();
+                    formData.append('file', blob, 'captured_image.jpg'); // Append the blob as a file
+
+                    // Send the image data to the server
+                    fetch("{{ url_for('upload_file') }}", {
+                        method: 'POST',
+                        body: formData // Send the FormData containing the image
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log('Image uploaded successfully.');
+                        } else {
+                            console.error('Error uploading image.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error uploading image: ', error);
+                    });
+                }, 'image/jpeg'); // Convert to JPEG format
+            }
+
+            // Start capturing image every 10 seconds
+            setInterval(captureImage, 10000); // 10000 milliseconds = 10 seconds
+
             // Toggle sidebar functionality
             document.getElementById('toggleSidebar').addEventListener('click', function() {
                 document.getElementById('sidebar').classList.toggle('minimized');
