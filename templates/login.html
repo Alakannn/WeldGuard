@@ -3,27 +3,293 @@
 <div class="auth-container">
     <div class="auth-box">
         <div class="logo-container">
-            <img src="{{ url_for('static', filename='images/powertechic.jpg') }}" alt="PowerTech IC Logo"
-                class="auth-logo">
+            <img src="{{ url_for('static', filename='images/powertechic.jpg') }}" alt="PowerTech IC Logo" class="auth-logo">
         </div>
-        <h2>Login</h2>
-        <form method="POST" action="{{ url_for('login') }}">
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Sign in to WeldGuard</p>
+        <form method="POST" action="{{ url_for('login') }}" aria-labelledby="loginForm" class="login-form">
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
+                <div class="input-group">
+                    <input type="text" id="username" name="username" required aria-required="true" 
+                           placeholder="Username" autocomplete="username">
+                </div>
             </div>
             <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+                <div class="input-group">
+                    <input type="password" id="password" name="password" required aria-required="true" 
+                           placeholder="Password" autocomplete="current-password">
+                    <button type="button" class="toggle-password" aria-label="Toggle password visibility">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" name="remember" id="remember">
+                    <span class="checkmark"></span>
+                    Remember me
+                </label>
             </div>
             {% if error %}
-            <div class="error-message">{{ error }}</div>
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ error }}
+            </div>
             {% endif %}
-            <button type="submit" class="btn btn-primary">Login</button>
+            <button type="submit" class="btn btn-primary" id="loginButton">
+                <span>Login</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
         </form>
         <p class="auth-link">
             Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a>
         </p>
     </div>
 </div>
+
+<style>
+    body {
+        background-color: #f4f4fc; /* Light gray background */
+        /* or use a gradient */
+        /* background: linear-gradient(135deg, #e9ecef 0%, #f4f7fc 100%); */
+        font-family: Arial, sans-serif; /* Ensure consistent font */
+        margin: 0; /* Remove default margin */
+        padding: 0; /* Remove default padding */
+    }
+
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 1rem;
+    }
+
+    .auth-box {
+        background-color: white;
+        padding: 2.5rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f4f7fc 0%, #e8eef9 100%);
+        padding: 1rem;
+    }
+
+    .auth-box {
+        background-color: white;
+        padding: 2.5rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+
+    .auth-box:hover {
+        transform: translateY(-5px);
+    }
+
+    .logo-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .auth-logo {
+        max-width: 180px;
+        height: auto;
+        border-radius: 8px;
+    }
+
+    h2 {
+        margin-bottom: 0.5rem;
+        font-size: 28px;
+        color: #1a1a1a;
+        font-weight: 600;
+    }
+
+    .subtitle {
+        color: #666;
+        margin-bottom: 2rem;
+        font-size: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .input-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        color: #666;
+        transition: color 0.3s ease;
+    }
+
+    input {
+        width: 100%;
+        padding: 1rem 1rem 1rem 2.8rem;
+        border: 2px solid #eee;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+    input:focus {
+        border-color: #3498db;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    input:focus + .input-icon {
+        color: #3498db;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 1rem;
+        background: none;
+        border: none;
+        color: #666;
+        cursor: pointer;
+        padding: 0;
+        font-size: 16px;
+    }
+
+    .form-options {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        font-size: 14px;
+    }
+
+    .remember-me {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        color: #666;
+    }
+
+    .remember-me input {
+        margin-right: 0.5rem;
+        width: auto;
+        padding: 0;
+    }
+
+    .error-message {
+        background-color: #fff2f2;
+        color: #e74c3c;
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+    }
+
+    .error-message i {
+        margin-right: 0.5rem;
+    }
+
+    .btn {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 16px;
+        font-weight: 600;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+    }
+
+    .btn i {
+        transition: transform 0.3s ease;
+    }
+
+    .btn:hover i {
+        transform: translateX(4px);
+    }
+
+    .auth-link {
+        margin-top: 1.5rem;
+        font-size: 15px;
+        color: #666;
+    }
+
+    .auth-link a {
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+    .auth-link a:hover {
+        color: #2980b9;
+    }
+
+    @media (max-width: 480px) {
+        .auth-box {
+            padding: 2rem;
+        }
+
+        h2 {
+            font-size: 24px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+        }
+    }</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle password visibility
+    const togglePassword = document.querySelector('.toggle-password');
+    const passwordInput = document.querySelector('#password');
+
+    togglePassword.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        
+        const icon = this.querySelector('i');
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    });
+
+    // Form validation and loading state
+    const loginForm = document.querySelector('form');
+    const loginButton = document.querySelector('#loginButton');
+
+    loginForm.addEventListener('submit', function(e) {
+        loginButton.disabled = true;
+        loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+    });
+});
+</script>
 {% endblock %}
