@@ -206,8 +206,7 @@
                     <div class="card-body">
                         <div class="processed-image-container">
                             {% if latest_detection and latest_detection.detected_image %}
-                                <img src="data:image/jpeg;base64,{{ latest_detection.detected_image }}" alt="Detection Result" class="processed-image">
-                            {% else %}
+                                    <img id="processedImage" src="data:image/jpeg;base64,{{ latest_detection.detected_image }}" alt="Detection Result" class="processed-image">                            {% else %}
                                 <p>No processed image available.</p>
                             {% endif %}
                         </div>
@@ -352,9 +351,33 @@
             document.getElementById('toggleSidebar').addEventListener('click', function() {
                 document.getElementById('sidebar').classList.toggle('minimized');
             });
+
+            function updateImage() {
+                fetch('/latest_detection_image')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Fetched data:', data);
+                        if (data.detected_image) {
+                            document.getElementById('processedImage').src = 'data:image/jpeg;base64,' + data.detected_image;
+                            console.log('Image updated');
+                        } else {
+                            console.log('No new image available');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching image:', error);
+                        // Optionally, update the UI to show that an error occurred
+                    });
+            }
+
+            setInterval(updateImage, 1000); // Update every 5 seconds
         });
     </script>
 </body>
 </html>
-
 

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, Response, flash
+from flask import Flask, render_template, request, redirect, url_for, session, Response, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import base64
@@ -231,16 +231,6 @@ def logout():
     flash('You have been logged out')
     return redirect(url_for('login'))
 
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        print("Database initialized")
-        if model is None:
-            print("WARNING: Model failed to load!")
-        else:
-            print("Model loaded successfully")
-    app.run(debug=True, host='0.0.0.0', port=5000)
-
 @app.route('/real_time_data')
 @login_required
 def real_time_data():
@@ -258,3 +248,24 @@ def welding_stats():
     failure_count = Detection.query.filter_by(detection_class='Failure').count()
     
     return jsonify({'success': success_count, 'failure': failure_count})
+
+@app.route('/latest_detection_image', methods=['GET'])
+@login_required
+def latest_detection_image():
+    latest_detection = Detection.query.filter_by(user_id=session['user_id']).order_by(Detection.timestamp.desc()).first()
+    
+    if latest_detection and latest_detection.detected_image:
+        return jsonify({'detected_image': latest_detection.detected_image})
+    else:
+        return jsonify({'detected_image': None}), 404  # Return 404 if no image is found
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+        print("Database initialized")
+        if model is None:
+            print("WARNING: Model failed to load!")
+        else:
+            print("Model loaded successfully")
+    app.run(debug=True, host='0.0.0.0', port=5000)
+
