@@ -134,51 +134,55 @@ def upload():
 @app.route('/analysis')
 @login_required
 def analysis():
-    # Fetch user detections
-    user_detections = Detection.query.filter_by(user_id=session['user_id']).order_by(Detection.timestamp.desc()).all()
-    
-    total_detections = len(user_detections)
-    class_counts = {}
-    confidence_data = []
-    daily_counts = {}
-    latest_detection = user_detections[0] if total_detections > 0 else None
-
-    if total_detections > 0:
-        # Class distribution and confidence data for trend
-        for detection in user_detections:
-            class_name = detection.detection_class or 'Unknown'
-            class_counts[class_name] = class_counts.get(class_name, 0) + 1
-            
-            confidence_data.append({
-                'timestamp': detection.timestamp.strftime('%Y-%m-%d'),
-                'confidence': float(detection.confidence) if detection.confidence else 0.0
-            })
+    try:
+        # Fetch user detections
+        user_detections = Detection.query.filter_by(user_id=session['user_id']).order_by(Detection.timestamp.desc()).all()
         
-        # Daily detection counts
-        for detection in user_detections:
-            date = detection.timestamp.strftime('%Y-%m-%d')
-            daily_counts[date] = daily_counts.get(date, 0) + 1
-    
-        # Calculate average confidence
-        confidences = [d.confidence for d in user_detections if d.confidence]
-        avg_confidence = sum(confidences) / len(confidences) if confidences else 0
-    else:
-        avg_confidence = 0
-    
-    # Prepare detected_image in Base64 format if necessary
-    if latest_detection and hasattr(latest_detection, 'detected_image'):
-        latest_detection.detected_image = latest_detection.detected_image  # Assuming it is already Base64 encoded
+        total_detections = len(user_detections)
+        class_counts = {}
+        confidence_data = []
+        daily_counts = {}
+        latest_detection = user_detections[0] if total_detections > 0 else None
 
-    # Prepare data for the template
-    return render_template(
-        'analysis.html',
-        total_detections=total_detections,
-        class_counts=class_counts,
-        confidence_data=confidence_data,
-        daily_counts=daily_counts,
-        avg_confidence=avg_confidence,
-        latest_detection=latest_detection  # Pass the latest detection object
-    )
+        if total_detections > 0:
+            # Class distribution and confidence data for trend
+            for detection in user_detections:
+                class_name = detection.detection_class or 'Unknown'
+                class_counts[class_name] = class_counts.get(class_name, 0) + 1
+                
+                confidence_data.append({
+                    'timestamp': detection.timestamp.strftime('%Y-%m-%d'),
+                    'confidence': float(detection.confidence) if detection.confidence else 0.0
+                })
+            
+            # Daily detection counts
+            for detection in user_detections:
+                date = detection.timestamp.strftime('%Y-%m-%d')
+                daily_counts[date] = daily_counts.get(date, 0) + 1
+        
+            # Calculate average confidence
+            confidences = [d.confidence for d in user_detections if d.confidence]
+            avg_confidence = sum(confidences) / len(confidences) if confidences else 0
+        else:
+            avg_confidence = 0
+        
+        # Prepare detected_image in Base64 format if necessary
+        if latest_detection and hasattr(latest_detection, 'detected_image'):
+            latest_detection.detected_image = latest_detection.detected_image  # Assuming it is already Base64 encoded
+
+        # Prepare data for the template
+        return render_template(
+            'analysis.html',
+            total_detections=total_detections,
+            class_counts=class_counts,
+            confidence_data=confidence_data,
+            daily_counts=daily_counts,
+            avg_confidence=avg_confidence,
+            latest_detection=latest_detection  # Pass the latest detection object
+        )
+    except Exception as e:
+        print(f"Error in analysis route: {str(e)}")
+        return "An error occurred while loading the analysis page", 500
 
 @app.route('/history')
 @login_required
@@ -259,6 +263,28 @@ def latest_detection_image():
     else:
         return jsonify({'detected_image': None}), 404  # Return 404 if no image is found
 
+def get_class_distribution():
+    # Fetch the latest 100 detections
+    latest_detections = Detection.query.filter_by(user_id=session['user_id']).order_by(Detection.timestamp.desc()).limit(100).all()
+    
+    class_counts = {}
+    for detection in latest_detections:
+        class_name = detection.detection_class or 'Unknown'
+        class_counts[class_name] = class_counts.get(class_name, 0) + 1
+    
+    return class_counts
+
+@app.route('/latest_class_distribution', methods=['GET'])
+@login_required
+def latest_class_distribution():
+    try:
+        # Fetch the latest class distribution data
+        class_counts = get_class_distribution()
+        return jsonify(class_counts)
+    except Exception as e:
+        print(f"Error in latest_class_distribution: {str(e)}")
+        return jsonify({"error": "An error occurred while fetching class distribution"}), 500
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
@@ -268,4 +294,3 @@ if __name__ == '__main__':
         else:
             print("Model loaded successfully")
     app.run(debug=True, host='0.0.0.0', port=5000)
-

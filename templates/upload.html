@@ -160,6 +160,20 @@
                 width: 90%; /* Take more width on small screens */
             }
         }
+        /* Example CSS to style the sidebar logo and its container */
+        .logo-container {
+            text-align: center;
+            margin-top: 20px; /* Adjust this value to lower the logo */
+            margin-bottom: 20px; /* Optional: Add some space below the logo */
+        }
+
+        .sidebar-logo {
+            max-width: 90%; /* Adjust this value to control the width of the logo */
+            height: auto;
+            max-height: 150px; /* Adjust this value to control the height of the logo */
+            display: block;
+            margin: 0 auto;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
@@ -192,6 +206,9 @@
                     <span>Logout</span>
                 </a>
             </div>
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/powertechic.jpg') }}" alt="Logo" class="sidebar-logo">
+            </div>
             <button class="toggle-btn" id="toggleSidebar">
                 <i class="fas fa-bars"></i>
             </button>
@@ -202,19 +219,21 @@
                     <h2>Upload Image for Detection</h2>
                 </div>
                 <form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data" class="upload-form">
-                    <div class="upload-zone" onclick="document.getElementById('file').click();">
+                    <div class="upload-zone" id="uploadZone">
                         <label for="file" class="upload-label">
                             <i class="fas fa-cloud-upload-alt fa-3x"></i>
                             <p>Drag and drop an image or click to browse</p>
                             <span class="file-types">Supported: JPG, PNG, JPEG</span>
                         </label>
-                        <input type="file" id="file" name="file" accept="image/*" required style="display: none;">
+                        <input type="file" id="file" name="file" accept="image/*" required style="display: none;" onchange="previewImage();">
                     </div>
-
+            
                     {% if error %}
                     <div class="error-message">{{ error }}</div>
                     {% endif %}
-
+            
+                    <img id="imagePreview" src="" alt="Image Preview" style="display: none; margin-top: 10px; max-width: 100%; border: 1px solid #ddd; border-radius: 8px;"/>
+            
                     <button type="submit" class="btn-submit">Upload and Detect</button>
                 </form>
             </div>
@@ -225,6 +244,68 @@
         document.getElementById('toggleSidebar').addEventListener('click', function() {
             document.getElementById('sidebar').classList.toggle('minimized');
         });
+    
+        function previewImage() {
+            const fileInput = document.getElementById('file');
+            const imagePreview = document.getElementById('imagePreview');
+            const file = fileInput.files[0]; // Get the selected file
+    
+            if (file) {
+                const reader = new FileReader(); // Create a FileReader to read the file
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result; // Set the image source to the file's data URL
+                    imagePreview.style.display = 'block'; // Display the image preview
+                };
+                reader.readAsDataURL(file); // Read the file as a data URL
+            } else {
+                imagePreview.src = ''; // Reset the image preview if no file
+                imagePreview.style.display = 'none'; // Hide the image preview
+            }
+        }
+
+        // Drag and Drop functionality
+        const uploadZone = document.getElementById('uploadZone');
+
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, preventDefaults, false);    
+            document.body.addEventListener(eventName, preventDefaults, false); 
+        });
+
+        // Highlight the drop area when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, highlight, false);
+        });
+
+        // Remove highlighting when item is no longer in the drop area
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        // Handle dropped files
+        uploadZone.addEventListener('drop', handleDrop, false);
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function highlight() {
+            uploadZone.classList.add('highlight');
+        }
+
+        function unhighlight() {
+            uploadZone.classList.remove('highlight');
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            // Set the file input to the dropped files
+            document.getElementById('file').files = files;
+            previewImage(); // Preview the image
+        }
     </script>
 </body>
 </html>

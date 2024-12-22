@@ -134,6 +134,20 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
+        /* Example CSS to style the sidebar logo and its container */
+        .logo-container {
+            text-align: center;
+            margin-top: 20px; /* Adjust this value to lower the logo */
+            margin-bottom: 20px; /* Optional: Add some space below the logo */
+        }
+
+        .sidebar-logo {
+            max-width: 90%; /* Adjust this value to control the width of the logo */
+            height: auto;
+            max-height: 150px; /* Adjust this value to control the height of the logo */
+            display: block;
+            margin: 0 auto;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
@@ -165,6 +179,9 @@
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span>
                 </a>
+            </div>
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/powertechic.jpg') }}" alt="Logo" class="sidebar-logo">
             </div>
             <button class="toggle-btn" id="toggleSidebar">
                 <i class="fas fa-bars"></i>
