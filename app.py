@@ -1,20 +1,22 @@
 from flask import Flask, render_template, request, redirect, url_for, session, Response, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
 import base64
 import os
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from welding_detection import load_model, predict_on_image, generate_video_frames, allowed_file, CLASS_NAMES
-from datetime import datetime, timedelta
 from collections import defaultdict
 from sqlalchemy import func
+import pytz
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', os.urandom(24))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///welding_detection.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+malaysia_tz = pytz.timezone('Asia/Kuala_Lumpur')
 
 db = SQLAlchemy(app)
 
@@ -138,7 +140,10 @@ def upload():
 @login_required
 def analysis():
     try:
-        # Fetch user detections
+        current_time = datetime.now(malaysia_tz)
+        start_time = current_time - timedelta(hours=24)
+        one_hour_ago = current_time - timedelta(hours=1)
+        
         user_detections = Detection.query.filter_by(user_id=session['user_id']).order_by(Detection.timestamp.desc()).all()
         
         total_detections = len(user_detections)
@@ -147,15 +152,6 @@ def analysis():
         daily_counts = {}
         latest_detection = user_detections[0] if total_detections > 0 else None
 
-        # Get data for the last 24 hours for timeline
-        start_time = datetime.utcnow() - timedelta(hours=24)
-        timeline_detections = Detection.query.filter(
-            Detection.user_id == session['user_id'],
-            Detection.timestamp >= start_time
-        ).order_by(Detection.timestamp.asc()).all()
-
-        # Get data for the last 1 hour for timeline
-        one_hour_ago = datetime.utcnow() - timedelta(hours=1)
         timeline_detections = Detection.query.filter(
             Detection.user_id == session['user_id'],
             Detection.timestamp >= one_hour_ago
@@ -165,36 +161,31 @@ def analysis():
         all_classes = set()
 
         if total_detections > 0:
-            # Class distribution and confidence data
             for detection in user_detections:
                 class_name = detection.detection_class or 'Unknown'
                 class_counts[class_name] = class_counts.get(class_name, 0) + 1
                 
+                malaysia_time = detection.timestamp.astimezone(malaysia_tz)
                 confidence_data.append({
-                    'timestamp': detection.timestamp.strftime('%Y-%m-%d'),
+                    'timestamp': malaysia_time.strftime('%Y-%m-%d'),
                     'confidence': float(detection.confidence) if detection.confidence else 0.0
                 })
+                
             for detection in timeline_detections:
-                timestamp = detection.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+                malaysia_time = detection.timestamp.astimezone(malaysia_tz)
+                timestamp = malaysia_time.strftime('%Y-%m-%d %H:%M:%S')
                 class_name = detection.detection_class or 'Unknown'
                 timeline_data[timestamp][class_name] += 1
                 all_classes.add(class_name)
             
-            # Daily detection counts
             for detection in user_detections:
-                date = detection.timestamp.strftime('%Y-%m-%d')
+                malaysia_time = detection.timestamp.astimezone(malaysia_tz)
+                date = malaysia_time.strftime('%Y-%m-%d')
                 daily_counts[date] = daily_counts.get(date, 0) + 1
             
-            # Calculate average confidence
             confidences = [d.confidence for d in user_detections if d.confidence]
             avg_confidence = sum(confidences) / len(confidences) if confidences else 0
             
-            # Process timeline data
-            for detection in timeline_detections:
-                hour_timestamp = detection.timestamp.strftime('%Y-%m-%d %H:00')
-                class_name = detection.detection_class or 'Unknown'
-                timeline_data[hour_timestamp][class_name] += 1
-                all_classes.add(class_name)
         else:
             avg_confidence = 0
         
@@ -318,37 +309,37 @@ def latest_class_distribution():
 @login_required
 def welding_timeline():
     try:
-        # Get data for the last hour
-        end_time = datetime.utcnow()
-        start_time = end_time - timedelta(hours=1)
+        current_time = datetime.now(malaysia_tz)
+        start_time = current_time - timedelta(hours=1)
         
-        # Query detections for the last hour
+        current_time_utc = current_time.astimezone(pytz.UTC)
+        start_time_utc = start_time.astimezone(pytz.UTC)
+        
         detections = Detection.query.filter(
             Detection.user_id == session['user_id'],
-            Detection.timestamp >= start_time,
-            Detection.timestamp <= end_time
-        ).order_by(Detection.timestamp.desc()).all()
+            Detection.timestamp >= start_time_utc,
+            Detection.timestamp <= current_time_utc
+        ).order_by(Detection.timestamp.asc()).all()  # Changed to ascending order
         
-        # Process the data in 5-minute intervals
         timeline_data = defaultdict(lambda: defaultdict(int))
         all_classes = set()
         
         for detection in detections:
-            # Round timestamp to nearest 5-minute interval
-            rounded_time = detection.timestamp.replace(
+            utc_time = pytz.UTC.localize(detection.timestamp)
+            malaysia_time = utc_time.astimezone(malaysia_tz)
+            
+            rounded_time = malaysia_time.replace(
                 second=0,
                 microsecond=0,
-                minute=(detection.timestamp.minute // 5) * 5
+                minute=(malaysia_time.minute // 5) * 5
             )
             timestamp = rounded_time.strftime('%Y-%m-%d %H:%M')
             class_name = detection.detection_class or 'Unknown'
             timeline_data[timestamp][class_name] += 1
             all_classes.add(class_name)
         
-        # Sort timestamps in reverse order (newest first)
-        timestamps = sorted(timeline_data.keys(), reverse=True)
+        timestamps = sorted(timeline_data.keys(), reverse=True)  # Reversed the order
         
-        # Create datasets for Chart.js
         datasets = []
         colors = {
             'Good Weld': '#4e73df',
@@ -357,14 +348,6 @@ def welding_timeline():
             'Porosity': '#1cc88a',
             'Undercut': '#36b9cc',
             'Unknown': '#858796'
-        }
-        pointStyles = {
-            'Good Weld': 'triangle',
-            'Bad Weld': 'cross',
-            'Crack': 'circle',
-            'Porosity': 'rect',
-            'Undercut': 'dash',
-            'Unknown': 'line'
         }
         
         for class_name in sorted(all_classes):
