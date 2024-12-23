@@ -277,6 +277,33 @@
             //setInterval(updateClassDistribution, 5000); // Update every 5 seconds
 
             // Line Chart
+            const classStyles = {
+                'Good Weld': {
+                    color: '#4e73df',
+                    pointStyle: 'triangle'
+                },
+                'Bad Weld': {
+                    color: '#e74a3b',
+                    pointStyle: 'cross'
+                },
+                'Crack': {
+                    color: '#f6c23e',
+                    pointStyle: 'circle'
+                },
+                'Porosity': {
+                    color: '#1cc88a',
+                    pointStyle: 'rect'
+                },
+                'Undercut': {
+                    color: '#36b9cc',
+                    pointStyle: 'star'
+                },
+                'Unknown': {
+                    color: '#858796',
+                    pointStyle: 'dash'
+                }
+            };
+
             const ctx = document.getElementById('confidenceLineChart').getContext('2d');
             const timelineChart = new Chart(ctx, {
                 type: 'line',
@@ -290,9 +317,18 @@
                     animation: {
                         duration: 750
                     },
+                    elements: {
+                        line: {
+                            tension: 0.4
+                        },
+                        point: {
+                            radius: 6,
+                            hoverRadius: 8
+                        }
+                    },
                     scales: {
                         x: {
-                            reverse: false,  // This ensures newest data appears on the right
+                            reverse: false,
                             ticks: {
                                 maxRotation: 45,
                                 minRotation: 45
@@ -341,16 +377,37 @@
                             return;
                         }
 
-                        // Update chart data
+                        // Transform the datasets to include styles
+                        const updatedDatasets = data.datasets.map(dataset => ({
+                            ...dataset,
+                            pointStyle: {
+                                'Good Welding': 'triangle',
+                                'Bad Welding': 'cross',
+                                'Crack': 'circle',
+                                'Porosity': 'rect',
+                                'Undercut': 'star'
+                            }[dataset.label] || 'circle',
+                            borderColor: {
+                                'Good Welding': '#4e73df',
+                                'Bad Welding': '#e74a3b',
+                                'Crack': '#f6c23e',
+                                'Porosity': '#1cc88a',
+                                'Undercut': '#36b9cc'
+                            }[dataset.label] || '#858796',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: false,
+                            radius: 6,
+                            pointBackgroundColor: dataset.borderColor,
+                            pointBorderColor: dataset.borderColor
+                        }));
+
                         timelineChart.data.labels = data.labels;
-                        timelineChart.data.datasets = data.datasets;
-                        
-                        // Update the chart with animation
+                        timelineChart.data.datasets = updatedDatasets;
                         timelineChart.update('active');
                     })
-                    .catch(error => {
-                        console.error('Error updating timeline chart:', error);
-                    });
+                    .catch(error => console.error('Error updating timeline chart:', error));
             }
 
             // Initial update
