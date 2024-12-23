@@ -276,52 +276,88 @@
             // Call function to update class distribution
             //setInterval(updateClassDistribution, 5000); // Update every 5 seconds
 
-            // Confidence Trend Line Chart
-            new Chart(document.getElementById('confidenceLineChart'), {
+            // Line Chart
+            const ctx = document.getElementById('confidenceLineChart').getContext('2d');
+            const timelineChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: {{ confidence_data | map(attribute='timestamp') | list | tojson }},
-                    datasets: [{
-                        label: 'Confidence',
-                        data: {{ confidence_data | map(attribute='confidence') | list | tojson }},
-                        borderColor: '#4e73df',
-                        backgroundColor: 'rgba(78, 115, 223, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
+                    labels: [],
+                    datasets: []
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 750
+                    },
                     scales: {
-                        y: {
-                            min: 0,
-                            max: 100,
-                            ticks: {
-                                stepSize: 20,
-                                callback: function (value) {
-                                    return value + '%';
-                                }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Confidence (%)'
-                            }
-                        },
                         x: {
+                            reverse: false,  // This ensures newest data appears on the right
                             ticks: {
                                 maxRotation: 45,
                                 minRotation: 45
+                            },
+                            title: {
+                                display: true,
+                                text: 'Time (Last Hour)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Detections'
                             }
                         }
                     },
                     plugins: {
                         legend: {
-                            display: false
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
                         }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
                     }
                 }
             });
+
+            // Function to update the timeline chart
+            function updateTimelineChart() {
+                fetch('/welding_timeline')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error('Server error:', data.error);
+                            return;
+                        }
+
+                        // Update chart data
+                        timelineChart.data.labels = data.labels;
+                        timelineChart.data.datasets = data.datasets;
+                        
+                        // Update the chart with animation
+                        timelineChart.update('active');
+                    })
+                    .catch(error => {
+                        console.error('Error updating timeline chart:', error);
+                    });
+            }
+
+            // Initial update
+            updateTimelineChart();
+
+            // Update every 5 seconds
+            setInterval(updateTimelineChart, 5000);
 
             // Function to capture image every 10 seconds
             function captureImage() {

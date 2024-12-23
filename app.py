@@ -6,6 +6,9 @@ import os
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from welding_detection import load_model, predict_on_image, generate_video_frames, allowed_file, CLASS_NAMES
+from datetime import datetime, timedelta
+from collections import defaultdict
+from sqlalchemy import func
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', os.urandom(24))
@@ -144,8 +147,25 @@ def analysis():
         daily_counts = {}
         latest_detection = user_detections[0] if total_detections > 0 else None
 
+        # Get data for the last 24 hours for timeline
+        start_time = datetime.utcnow() - timedelta(hours=24)
+        timeline_detections = Detection.query.filter(
+            Detection.user_id == session['user_id'],
+            Detection.timestamp >= start_time
+        ).order_by(Detection.timestamp.asc()).all()
+
+        # Get data for the last 1 hour for timeline
+        one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+        timeline_detections = Detection.query.filter(
+            Detection.user_id == session['user_id'],
+            Detection.timestamp >= one_hour_ago
+        ).order_by(Detection.timestamp.asc()).all()
+        
+        timeline_data = defaultdict(lambda: defaultdict(int))
+        all_classes = set()
+
         if total_detections > 0:
-            # Class distribution and confidence data for trend
+            # Class distribution and confidence data
             for detection in user_detections:
                 class_name = detection.detection_class or 'Unknown'
                 class_counts[class_name] = class_counts.get(class_name, 0) + 1
@@ -154,23 +174,30 @@ def analysis():
                     'timestamp': detection.timestamp.strftime('%Y-%m-%d'),
                     'confidence': float(detection.confidence) if detection.confidence else 0.0
                 })
+            for detection in timeline_detections:
+                timestamp = detection.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+                class_name = detection.detection_class or 'Unknown'
+                timeline_data[timestamp][class_name] += 1
+                all_classes.add(class_name)
             
             # Daily detection counts
             for detection in user_detections:
                 date = detection.timestamp.strftime('%Y-%m-%d')
                 daily_counts[date] = daily_counts.get(date, 0) + 1
-        
+            
             # Calculate average confidence
             confidences = [d.confidence for d in user_detections if d.confidence]
             avg_confidence = sum(confidences) / len(confidences) if confidences else 0
+            
+            # Process timeline data
+            for detection in timeline_detections:
+                hour_timestamp = detection.timestamp.strftime('%Y-%m-%d %H:00')
+                class_name = detection.detection_class or 'Unknown'
+                timeline_data[hour_timestamp][class_name] += 1
+                all_classes.add(class_name)
         else:
             avg_confidence = 0
         
-        # Prepare detected_image in Base64 format if necessary
-        if latest_detection and hasattr(latest_detection, 'detected_image'):
-            latest_detection.detected_image = latest_detection.detected_image  # Assuming it is already Base64 encoded
-
-        # Prepare data for the template
         return render_template(
             'analysis.html',
             total_detections=total_detections,
@@ -178,7 +205,9 @@ def analysis():
             confidence_data=confidence_data,
             daily_counts=daily_counts,
             avg_confidence=avg_confidence,
-            latest_detection=latest_detection  # Pass the latest detection object
+            latest_detection=latest_detection,
+            timeline_data=dict(timeline_data),
+            all_classes=list(all_classes)
         )
     except Exception as e:
         print(f"Error in analysis route: {str(e)}")
@@ -284,6 +313,80 @@ def latest_class_distribution():
     except Exception as e:
         print(f"Error in latest_class_distribution: {str(e)}")
         return jsonify({"error": "An error occurred while fetching class distribution"}), 500
+
+@app.route('/welding_timeline')
+@login_required
+def welding_timeline():
+    try:
+        # Get data for the last hour
+        end_time = datetime.utcnow()
+        start_time = end_time - timedelta(hours=1)
+        
+        # Query detections for the last hour
+        detections = Detection.query.filter(
+            Detection.user_id == session['user_id'],
+            Detection.timestamp >= start_time,
+            Detection.timestamp <= end_time
+        ).order_by(Detection.timestamp.desc()).all()
+        
+        # Process the data in 5-minute intervals
+        timeline_data = defaultdict(lambda: defaultdict(int))
+        all_classes = set()
+        
+        for detection in detections:
+            # Round timestamp to nearest 5-minute interval
+            rounded_time = detection.timestamp.replace(
+                second=0,
+                microsecond=0,
+                minute=(detection.timestamp.minute // 5) * 5
+            )
+            timestamp = rounded_time.strftime('%Y-%m-%d %H:%M')
+            class_name = detection.detection_class or 'Unknown'
+            timeline_data[timestamp][class_name] += 1
+            all_classes.add(class_name)
+        
+        # Sort timestamps in reverse order (newest first)
+        timestamps = sorted(timeline_data.keys(), reverse=True)
+        
+        # Create datasets for Chart.js
+        datasets = []
+        colors = {
+            'Good Weld': '#4e73df',
+            'Bad Weld': '#e74a3b',
+            'Crack': '#f6c23e',
+            'Porosity': '#1cc88a',
+            'Undercut': '#36b9cc',
+            'Unknown': '#858796'
+        }
+        pointStyles = {
+            'Good Weld': 'triangle',
+            'Bad Weld': 'cross',
+            'Crack': 'circle',
+            'Porosity': 'rect',
+            'Undercut': 'dash',
+            'Unknown': 'line'
+        }
+        
+        for class_name in sorted(all_classes):
+            dataset = {
+                'label': class_name,
+                'data': [timeline_data[t][class_name] for t in timestamps],
+                'borderColor': colors.get(class_name, '#000000'),
+                'backgroundColor': 'rgba(0, 0, 0, 0)',
+                'borderWidth': 2,
+                'tension': 0.4,
+                'fill': False
+            }
+            datasets.append(dataset)
+            
+        return jsonify({
+            'labels': timestamps,
+            'datasets': datasets
+        })
+        
+    except Exception as e:
+        print(f"Error in welding_timeline: {str(e)}")
+        return jsonify({"error": "An error occurred"}), 500
 
 if __name__ == '__main__':
     with app.app_context():
